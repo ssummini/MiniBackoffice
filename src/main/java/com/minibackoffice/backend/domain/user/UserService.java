@@ -6,6 +6,10 @@ import com.minibackoffice.backend.domain.user.repository.UserRepository;
 import com.minibackoffice.backend.global.enums.UserRole;
 import com.minibackoffice.backend.global.enums.UserStatus;
 
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -52,4 +56,18 @@ public class UserService {
         // 5) 응답 DTO로 변환해서 반환
         return new UserResponse(savedUser);
     }
+
+    public List<UserResponse> findAll() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    public UserResponse findById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+        return new UserResponse(user);
+    }
+
 }
