@@ -41,7 +41,7 @@ Spring Boot + JPA + MySQL 기반으로 CRUD API를 구현하고,
   "status": "ACTIVE"
 }
 ```
-요청 예시 (role / status 생략 시 기본값 적용)
+#### 요청 예시 (role / status 생략 시 기본값 적용)
 ```json
 {
   "email": "test2@test.com",
@@ -49,10 +49,10 @@ Spring Boot + JPA + MySQL 기반으로 CRUD API를 구현하고,
   "name": "수민"
 }
 ```
-role 기본값: USER
-status 기본값: ACTIVE
+- role 기본값: USER  
+- status 기본값: ACTIVE  
 
-응답 예시 (성공)
+#### 응답 예시 (성공)
 ```json
 {
   "id": 1,
@@ -63,10 +63,9 @@ status 기본값: ACTIVE
 }
 ```
 
-예외 처리
-이메일 중복 시: 409 Conflict
-잘못된 role / status 값 입력 시: 400 Bad Request
-
+#### 예외 처리
+- 이메일 중복 시: 409 Conflict
+- 잘못된 role / status 값 입력 시: 400 Bad Request
 ## Progress
 - [x] Product CRUD API
 - [x] User Create API
