@@ -63,3 +63,11 @@ status 기본값: ACTIVE
 예외 처리
 이메일 중복 시: 409 Conflict
 잘못된 role / status 값 입력 시: 400 Bad Request
+
+## Progress
+- [x] Product CRUD API
+- [x] User Create API
+- [ ] User Read API (list / detail)
+- [ ] Validation & Exception Handling
+- [ ] Password Encryption (BCrypt)
+- [ ] Deployment
