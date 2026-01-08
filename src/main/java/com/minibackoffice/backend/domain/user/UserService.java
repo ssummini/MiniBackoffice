@@ -1,16 +1,17 @@
 package com.minibackoffice.backend.domain.user;
 
 import com.minibackoffice.backend.domain.user.dto.UserCreateRequest;
+import com.minibackoffice.backend.domain.user.dto.UserLoginRequest;
 import com.minibackoffice.backend.domain.user.dto.UserResponse;
 import com.minibackoffice.backend.domain.user.repository.UserRepository;
 import com.minibackoffice.backend.global.enums.UserRole;
 import com.minibackoffice.backend.global.enums.UserStatus;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,11 +20,16 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse create(UserCreateRequest request) {
+
+    String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         // 1) 이메일 중복 검사
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -44,7 +50,7 @@ public class UserService {
         // 3) 엔티티 생성
         User user = new User(
                 request.getEmail(),
-                request.getPassword(),
+                encodedPassword,
                 request.getName(),
                 role,
                 status
@@ -67,6 +73,26 @@ public class UserService {
     public UserResponse findById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+        return new UserResponse(user);
+    }
+
+    public UserResponse login(UserLoginRequest request) {
+
+        // 1) 이메일로 사용자 조회
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.")
+                );
+
+        // 2) 비밀번호 비교 (핵심!!)
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "이메일 또는 비밀번호가 올바르지 않습니다."
+            );
+        }
+
+        // 3) 로그인 성공 → 사용자 정보 반환
         return new UserResponse(user);
     }
 
