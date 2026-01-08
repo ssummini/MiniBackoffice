@@ -59,6 +59,7 @@ status 기본값: ACTIVE
   "role": "USER",
   "status": "ACTIVE"
 }
+ ```
 
 예외 처리
 이메일 중복 시: 409 Conflict
@@ -72,4 +73,3 @@ status 기본값: ACTIVE
 - [ ] Password Encryption (BCrypt)
 - [ ] Deployment
 
----
