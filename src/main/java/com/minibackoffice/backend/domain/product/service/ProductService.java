@@ -7,7 +7,9 @@ import com.minibackoffice.backend.domain.product.repository.ProductRepository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ProductService {
@@ -29,21 +31,21 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    // 단건 조회 (없으면 null 반환)
-    public Product findById(Long id){
-        return productRepository.findById(id).orElse(null);
+    // 단건 조회 (없으면 404)
+    public Product findById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."
+                ));
     }
 
-    // 수정
+    // 수정 (없으면 404)
     public Product update(Long id, ProductUpdateRequest request) {
-        
-        Optional<Product> optionalProduct = productRepository.findById(id);
 
-        if(optionalProduct.isEmpty()){
-            return null;
-        }
-
-        Product product = optionalProduct.get();
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."
+                ));
 
         product.setName(request.name);
         product.setPrice(request.price);
@@ -54,12 +56,11 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    // 삭제
-    public boolean delete(Long id) {
-        if(!productRepository.existsById(id)) {
-            return false; // 없으면 삭제 실패
+    // 삭제 (없으면 404, 성공하면 void)
+    public void delete(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다.");
         }
         productRepository.deleteById(id);
-        return true; // 삭제 성공
     }
 }

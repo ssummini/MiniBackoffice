@@ -7,86 +7,104 @@ import com.minibackoffice.backend.domain.product.dto.ProductUpdateRequest;
 import com.minibackoffice.backend.domain.product.repository.ProductRepository;
 import com.minibackoffice.backend.domain.product.service.ProductService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductRepository productRepository;
-
     private final ProductService productService;
 
-    public ProductController(ProductService productService, ProductRepository productRepository) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.productRepository = productRepository;
     }
 
-    // 등록
+    // 등록 (ADMIN만)
     @PostMapping
-    public Product create(@RequestBody ProductCreateRequest req) {
-        
+    public ResponseEntity<ProductResponse> create(
+            HttpServletRequest request,
+            @Valid @RequestBody ProductCreateRequest req
+    ) {
+        requireAdmin(request);
+
         Product product = new Product(
-            req.name,
-            req.price,
-            req.stockQuantity,
-            req.status,
-            req.thumbnailUrl
+                req.name,
+                req.price,
+                req.stockQuantity,
+                req.status,
+                req.thumbnailUrl
         );
 
-        return productService.save(product);
+        Product saved = productService.save(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ProductResponse(saved)); // 201
     }
 
-    // 전체 조회
+    // 전체 조회 (누구나)
     @GetMapping
-    public List<ProductResponse> findAll() {
+    public ResponseEntity<List<ProductResponse>> findAll() {
 
         List<Product> products = productService.findAll();
 
         List<ProductResponse> result = new ArrayList<>();
         for (Product p : products) {
-            result.add(new ProductResponse((p)));
+            result.add(new ProductResponse(p));
         }
-        return result;
-    }
 
-    // 단건 조회
+        return ResponseEntity.ok(result); // 200
+    }
+    
+    // 단건 조회 (누구나)
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> findById(@PathVariable Long id) {
 
         Product product = productService.findById(id);
-
-        if(product == null) {
-            return ResponseEntity.notFound().build(); // 404 응답
-        }
-
-        return ResponseEntity.ok(new ProductResponse(product)); 
+        return ResponseEntity.ok(new ProductResponse(product)); // 200
     }
 
-    // 수정
+    // 수정 (ADMIN만)
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable Long id, 
-                                                  @RequestBody ProductUpdateRequest req) {
+    public ResponseEntity<ProductResponse> update(
+            HttpServletRequest request,
+            @PathVariable Long id,
+            @Valid @RequestBody ProductUpdateRequest req
+    ) {
+        requireAdmin(request);
+
         Product updated = productService.update(id, req);
-
-        if(updated == null) {
-            return ResponseEntity.notFound().build(); // 404
-        }
-
-        return ResponseEntity.ok(new ProductResponse(updated)); // 200 + DTO
+        return ResponseEntity.ok(new ProductResponse(updated)); // 200
     }
 
-    // 삭제
+    // 삭제 (ADMIN만)
     @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        if(!productRepository.existsById(id)) {
-            return false;
-        }
+    public ResponseEntity<Void> delete(
+            HttpServletRequest request,
+            @PathVariable Long id
+    ) {
+        requireAdmin(request);
+
         productService.delete(id);
-        return true;
+        return ResponseEntity.noContent().build(); // 204
+    }
+
+    // 관리자 체크
+    private void requireAdmin(HttpServletRequest request) {
+        Object role = request.getAttribute("role");
+
+        if(role == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        if(!"ADMIN".equals(role.toString())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
+        }
     }
 }

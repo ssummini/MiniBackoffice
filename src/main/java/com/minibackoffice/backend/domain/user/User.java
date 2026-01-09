@@ -46,4 +46,9 @@ public class User extends BaseEntity {
     public String getName() { return name; }
     public UserRole getRole() { return role; }
     public UserStatus getStatus() { return status; }
+
+    public void setStatus(UserStatus status) {
+    this.status = status;
+}
+
 }
