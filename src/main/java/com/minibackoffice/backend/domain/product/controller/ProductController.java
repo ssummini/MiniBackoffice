@@ -34,7 +34,6 @@ public class ProductController {
             HttpServletRequest request,
             @Valid @RequestBody ProductCreateRequest req
     ) {
-        requireAdmin(request);
 
         Product product = new Product(
                 req.name,
@@ -77,7 +76,6 @@ public class ProductController {
             @PathVariable Long id,
             @Valid @RequestBody ProductUpdateRequest req
     ) {
-        requireAdmin(request);
 
         Product updated = productService.update(id, req);
         return ResponseEntity.ok(new ProductResponse(updated)); // 200
@@ -89,22 +87,9 @@ public class ProductController {
             HttpServletRequest request,
             @PathVariable Long id
     ) {
-        requireAdmin(request);
 
         productService.delete(id);
         return ResponseEntity.noContent().build(); // 204
     }
 
-    // 관리자 체크
-    private void requireAdmin(HttpServletRequest request) {
-        Object role = request.getAttribute("role");
-
-        if(role == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
-        }
-
-        if(!"ADMIN".equals(role.toString())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
-        }
-    }
 }

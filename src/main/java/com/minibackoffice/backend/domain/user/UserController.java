@@ -50,16 +50,20 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<?> me(HttpServletRequest request) {
-        Object userId = request.getAttribute("userId");
-        Object role = request.getAttribute("role");
+        Object userIdAttr = request.getAttribute("userId");
 
-        if(userId == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        if (userIdAttr == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
 
-        return ResponseEntity.ok(
-                "로그인 사용자 ID=" + userId + ", role=" + role
-        );
+        Long userId;
+        try {
+            userId = Long.parseLong(userIdAttr.toString());
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+        }   
+
+        return ResponseEntity.ok(userService.me(userId));
     }
 
     // 관리자 기능: 사용자 상태 변경 API
@@ -70,28 +74,13 @@ public class UserController {
             @Valid @RequestBody UserStatusUpdateRequest req
     ) {
         // 1) 관리자 체크
-        requireAdmin(request);
+        // requireAdmin(request);
 
         // 2) 상태 변경 로직
         UserResponse response = userService.updateStatus(id, req);
 
         // 3) 성공 응답
         return ResponseEntity.ok(response);
-    }
-
-    // 관리자 체크
-    private void requireAdmin(HttpServletRequest request) {
-        Object role = request.getAttribute("role");
-
-        // 로그인 자체가 안 된 경우
-        if (role == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
-        }
-
-        // 로그인은 했지만 ADMIN이 아닌 경우
-        if (!"ADMIN".equals(role.toString())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
-        }
     }
 
 }
