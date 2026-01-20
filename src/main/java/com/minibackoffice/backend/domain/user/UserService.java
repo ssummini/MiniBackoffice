@@ -46,16 +46,10 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.");
         }
 
-        // 2) role/status 기본값 세팅
+        // 2) role/status는 회원가입에서는 고정 (보안)
         UserRole role = UserRole.USER;
-        if (request.getRole() != null && !request.getRole().isBlank()) {
-            role = UserRole.valueOf(request.getRole()); // "USER" / "ADMIN"
-        }
-
         UserStatus status = UserStatus.ACTIVE;
-        if (request.getStatus() != null && !request.getStatus().isBlank()) {
-            status = UserStatus.valueOf(request.getStatus()); // "ACTIVE" / "BLOCKED"
-        }
+
 
         // 3) 엔티티 생성
         User user = new User(

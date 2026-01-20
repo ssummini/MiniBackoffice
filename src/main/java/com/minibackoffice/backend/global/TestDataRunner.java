@@ -1,25 +1,41 @@
 package com.minibackoffice.backend.global;
 
-import com.minibackoffice.backend.domain.product.Product;
-import com.minibackoffice.backend.domain.product.repository.ProductRepository;
+import com.minibackoffice.backend.domain.user.User;
+import com.minibackoffice.backend.domain.user.repository.UserRepository;
+import com.minibackoffice.backend.global.enums.UserRole;
+import com.minibackoffice.backend.global.enums.UserStatus;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-// @Component
+@Component
+@Profile("prod")
 public class TestDataRunner implements CommandLineRunner {
 
-    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public TestDataRunner(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public TestDataRunner(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) {
-        Product p = new Product("테스트상품", 10000, 10, "SALE", null);
-        productRepository.save(p);
 
-        System.out.println("저장 완료! productId=" + p.getId());
-        System.out.println("전체 상품 수=" + productRepository.count());
+        if (!userRepository.existsByEmail("admin@test.com")) {
+            User admin = new User(
+                    "admin@test.com",
+                    passwordEncoder.encode("1234"),
+                    "관리자",
+                    UserRole.ADMIN,
+                    UserStatus.ACTIVE
+            );
+            userRepository.save(admin);
+            System.out.println("Admin created: admin@test.com / 1234");
+        } else {
+            System.out.println("Admin already exists");
+        }
     }
 }
