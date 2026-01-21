@@ -19,4 +19,8 @@ public class ProductResponse {
         this.status = product.getStatus();
         this.thumbnailUrl = product.getThumbnailUrl();
     }
+
+    public static ProductResponse from(Product product) {
+        return new ProductResponse(product);
+    }
 }

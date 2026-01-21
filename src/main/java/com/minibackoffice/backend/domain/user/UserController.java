@@ -50,7 +50,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(HttpServletRequest request) {
+    public ResponseEntity<UserResponse> me(HttpServletRequest request) {
         Object userIdAttr = request.getAttribute("userId");
 
         if (userIdAttr == null) {
@@ -62,10 +62,11 @@ public class UserController {
             userId = Long.parseLong(userIdAttr.toString());
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
-        }   
+        }
 
         return ResponseEntity.ok(userService.me(userId));
     }
+
 
     // 관리자 기능: 사용자 상태 변경 API
     @AdminOnly

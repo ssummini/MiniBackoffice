@@ -3,7 +3,6 @@ package com.minibackoffice.backend.domain.user;
 import com.minibackoffice.backend.domain.user.dto.UserCreateRequest;
 import com.minibackoffice.backend.domain.user.dto.UserLoginRequest;
 import com.minibackoffice.backend.domain.user.dto.UserLoginResponse;
-import com.minibackoffice.backend.domain.user.dto.UserMeResponse;
 import com.minibackoffice.backend.domain.user.dto.UserResponse;
 import com.minibackoffice.backend.domain.user.dto.UserStatusUpdateRequest;
 import com.minibackoffice.backend.domain.user.repository.UserRepository;
@@ -68,16 +67,15 @@ public class UserService {
     }
 
     public List<UserResponse> findAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserResponse::new)
-                .collect(Collectors.toList());
+        return userRepository.findAll().stream()
+                .map(UserResponse:: from)
+                .toList();
     }
 
     public UserResponse findById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        return new UserResponse(user);
+        return UserResponse.from(user);
     }
 
     public UserLoginResponse login(UserLoginRequest request) {
@@ -126,14 +124,14 @@ public class UserService {
         User saved = userRepository.save(user);
 
         // 5) 응답 DTO로 변환해서 반환
-        return new UserResponse(saved);
+        return UserResponse.from(saved);
     }
 
-    public UserMeResponse me(Long userId) {
+    public UserResponse me(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
-        return UserMeResponse.from(user);
-
+        return UserResponse.from(user);
     }
+
 }

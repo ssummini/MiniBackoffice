@@ -20,9 +20,14 @@ public class UserResponse {
         this.status = user.getStatus();
     }
 
+    public static UserResponse from(User user) {
+        return new UserResponse(user);
+    }
+
     public Long getId() { return id; }
     public String getEmail() { return email; }
     public String getName() { return name; }
     public UserRole getRole() { return role; }
     public UserStatus getStatus() { return status; }
 }
+

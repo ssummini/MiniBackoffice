@@ -44,21 +44,20 @@ public class ProductController {
         );
 
         Product saved = productService.save(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ProductResponse(saved)); // 201
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ProductResponse.from(saved));
     }
 
     // 전체 조회 (누구나)
     @GetMapping
     public ResponseEntity<List<ProductResponse>> findAll() {
 
-        List<Product> products = productService.findAll();
+        List<ProductResponse> result = productService.findAll().stream()
+                .map(ProductResponse::from)
+                .toList();
 
-        List<ProductResponse> result = new ArrayList<>();
-        for (Product p : products) {
-            result.add(new ProductResponse(p));
-        }
-
-        return ResponseEntity.ok(result); // 200
+        return ResponseEntity.ok(result);
     }
     
     // 단건 조회 (누구나)
@@ -66,7 +65,7 @@ public class ProductController {
     public ResponseEntity<ProductResponse> findById(@PathVariable Long id) {
 
         Product product = productService.findById(id);
-        return ResponseEntity.ok(new ProductResponse(product)); // 200
+        return ResponseEntity.ok(ProductResponse.from(product));
     }
 
     // 수정 (ADMIN만)
@@ -77,7 +76,7 @@ public class ProductController {
             @Valid @RequestBody ProductUpdateRequest req
     ) {
         Product updated = productService.update(id, req);
-        return ResponseEntity.ok(new ProductResponse(updated));
+        return ResponseEntity.ok(ProductResponse.from(updated));
     }
 
     // 삭제 (ADMIN만)
