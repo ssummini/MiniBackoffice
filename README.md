@@ -79,4 +79,4 @@ Header: Authorization: Bearer {TOKEN}
 - [ ] React 연동
 
 > 현재 백엔드 기능 구현 및 배포를 완료한 상태이며,  
-> 이후 React 기반 프론트엔드 연동을 통해 백오피스 UI까지 확장할 예정입니다.
+> 이후 React 기반 프론트엔드 연동을 통해 백오피스 UI까지 확장할 예정입니다..
