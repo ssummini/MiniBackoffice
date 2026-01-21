@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.minibackoffice.backend.global.auth.AdminOnly;
 
 @RestController
 @RequestMapping("/api/users")
@@ -67,19 +68,17 @@ public class UserController {
     }
 
     // 관리자 기능: 사용자 상태 변경 API
+    @AdminOnly
     @PatchMapping("/{id}/status")
     public ResponseEntity<UserResponse> updateStatus(
-            HttpServletRequest request,
             @PathVariable Long id,
             @Valid @RequestBody UserStatusUpdateRequest req
     ) {
-        // 1) 관리자 체크
-        // requireAdmin(request);
 
-        // 2) 상태 변경 로직
+        // 1) 상태 변경 로직
         UserResponse response = userService.updateStatus(id, req);
 
-        // 3) 성공 응답
+        // 2) 성공 응답
         return ResponseEntity.ok(response);
     }
 

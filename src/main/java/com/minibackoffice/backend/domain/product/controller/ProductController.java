@@ -16,7 +16,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
+import com.minibackoffice.backend.global.auth.AdminOnly;
 
 @RestController
 @RequestMapping("/api/products")
@@ -29,12 +30,11 @@ public class ProductController {
     }
 
     // 등록 (ADMIN만)
+    @AdminOnly
     @PostMapping
     public ResponseEntity<ProductResponse> create(
-            HttpServletRequest request,
             @Valid @RequestBody ProductCreateRequest req
     ) {
-
         Product product = new Product(
                 req.name,
                 req.price,
@@ -70,26 +70,22 @@ public class ProductController {
     }
 
     // 수정 (ADMIN만)
+    @AdminOnly
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(
-            HttpServletRequest request,
             @PathVariable Long id,
             @Valid @RequestBody ProductUpdateRequest req
     ) {
-
         Product updated = productService.update(id, req);
-        return ResponseEntity.ok(new ProductResponse(updated)); // 200
+        return ResponseEntity.ok(new ProductResponse(updated));
     }
 
     // 삭제 (ADMIN만)
+    @AdminOnly
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
-            HttpServletRequest request,
-            @PathVariable Long id
-    ) {
-
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
-        return ResponseEntity.noContent().build(); // 204
+        return ResponseEntity.noContent().build();
     }
 
 }
