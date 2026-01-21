@@ -30,8 +30,8 @@ public class ProductController {
     }
 
     // 등록 (ADMIN만)
-    @AdminOnly
     @PostMapping
+    @AdminOnly
     public ResponseEntity<ProductResponse> create(
             @Valid @RequestBody ProductCreateRequest req
     ) {
@@ -43,40 +43,31 @@ public class ProductController {
                 req.thumbnailUrl
         );
 
-        Product saved = productService.save(product);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ProductResponse.from(saved));
+                .body(productService.save(product));
     }
 
     // 전체 조회 (누구나)
     @GetMapping
     public ResponseEntity<List<ProductResponse>> findAll() {
-
-        List<ProductResponse> result = productService.findAll().stream()
-                .map(ProductResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(productService.findAll());
     }
     
     // 단건 조회 (누구나)
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> findById(@PathVariable Long id) {
-
-        Product product = productService.findById(id);
-        return ResponseEntity.ok(ProductResponse.from(product));
+        return ResponseEntity.ok(productService.findById(id));
     }
 
     // 수정 (ADMIN만)
-    @AdminOnly
     @PutMapping("/{id}")
+    @AdminOnly
     public ResponseEntity<ProductResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody ProductUpdateRequest req
     ) {
-        Product updated = productService.update(id, req);
-        return ResponseEntity.ok(ProductResponse.from(updated));
+        return ResponseEntity.ok(productService.update(id, req));
     }
 
     // 삭제 (ADMIN만)
