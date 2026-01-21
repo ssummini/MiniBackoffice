@@ -69,13 +69,33 @@ Header: Authorization: Bearer {TOKEN}
 
 ---
 
+## ❗ Error Response Format
+모든 에러 응답은 공통 포맷으로 반환됩니다.
+
+### 예시 (401 Unauthorized)
+```json
+{
+  "status": 401,
+  "code": "UNAUTHORIZED",
+  "message": "로그인이 필요합니다.",
+  "path": "/api/products",
+  "timestamp": "2026-01-21T16:57:12.739"
+}
+```
+- 예외는 ResponseStatusException으로 발생시키고
+- GlobalExceptionHandler에서 공통 포맷으로 변환해 반환합니다.
+
+--- 
+
 ## 📌 Progress
 - [x] Product CRUD + 권한 분리
 - [x] User 회원가입/로그인 + JWT
 - [x] BCrypt 적용
 - [x] Render 배포
 - [x] DB 영구화(PostgreSQL)
-- [ ] 리팩토링(권한 체크 공통화, 에러 포맷 통일)
+- [x] 리팩토링
+  - [x] 권한 체크 공통화 (@AdminOnly)
+  - [x] 에러 응답 포맷 통일 (GlobalExceptionHandler)
 - [ ] React 연동
 
 > 현재 백엔드 기능 구현 및 배포를 완료한 상태이며,  
