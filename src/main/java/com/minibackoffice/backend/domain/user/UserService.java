@@ -10,6 +10,8 @@ import com.minibackoffice.backend.global.enums.UserRole;
 import com.minibackoffice.backend.global.enums.UserStatus;
 import com.minibackoffice.backend.global.jwt.JwtTokenProvider;
 
+import jakarta.annotation.PostConstruct;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,13 +30,12 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public UserService(UserRepository userRepository,
-                    PasswordEncoder passwordEncoder,
-                    JwtTokenProvider jwtTokenProvider) {
+            PasswordEncoder passwordEncoder,
+            JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
     }
-
 
     public UserResponse create(UserCreateRequest request) {
 
@@ -49,15 +50,13 @@ public class UserService {
         UserRole role = UserRole.USER;
         UserStatus status = UserStatus.ACTIVE;
 
-
         // 3) 엔티티 생성
         User user = new User(
                 request.getEmail(),
                 encodedPassword,
                 request.getName(),
                 role,
-                status
-        );
+                status);
 
         // 4) 저장
         User savedUser = userRepository.save(user);
@@ -68,7 +67,7 @@ public class UserService {
 
     public List<UserResponse> findAll() {
         return userRepository.findAll().stream()
-                .map(UserResponse:: from)
+                .map(UserResponse::from)
                 .toList();
     }
 
@@ -82,9 +81,7 @@ public class UserService {
 
         // 1) 이메일로 사용자 조회
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.")
-                );
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."));
 
         // 2) 비밀번호 비교 (핵심!!)
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -95,31 +92,29 @@ public class UserService {
         String token = jwtTokenProvider.createToken(
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name()
-        );
+                user.getRole().name());
 
         return new UserLoginResponse(token, new UserResponse(user));
     }
 
     // 관리자 기능: 사용자 상태 변경
     public UserResponse updateStatus(Long id, UserStatusUpdateRequest request) {
-        
+
         // 1) 사용자 찾기
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."
-                ));
+                        HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
         // 2) 문자열 -> Enum 변환
         try {
             UserStatus newStatus = UserStatus.valueOf(request.getStatus()); // "ACTIVE" 또는 "BLOCKED"
-            
+
             // 3) 엔티티 값 변경
-            user.setStatus(newStatus); 
+            user.setStatus(newStatus);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "status 값이 올바르지 않습니다.");
         }
-        
+
         // 4) 저장 (DB 반영)
         User saved = userRepository.save(user);
 
@@ -132,6 +127,21 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
         return UserResponse.from(user);
+    }
+
+    @PostConstruct
+    public void initAdmin() {
+        // dev 환경에서만 사용하는 테스트용 관리자 계정
+        // 배포 전 반드시 제거할 것
+        if (!userRepository.existsByEmail("admin@test.com")) {
+            User admin = new User(
+                    "admin@test.com",
+                    passwordEncoder.encode("1234"),
+                    "관리자",
+                    UserRole.ADMIN,
+                    UserStatus.ACTIVE);
+            userRepository.save(admin);
+        }
     }
 
 }
