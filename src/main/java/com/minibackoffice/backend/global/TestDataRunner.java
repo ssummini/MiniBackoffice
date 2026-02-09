@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("prod")
+@Profile({"dev","prod"})
 public class TestDataRunner implements CommandLineRunner {
 
     private final UserRepository userRepository;
@@ -23,19 +23,33 @@ public class TestDataRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-
+        // ADMIN 계정
         if (!userRepository.existsByEmail("admin@test.com")) {
             User admin = new User(
                     "admin@test.com",
                     passwordEncoder.encode("1234"),
                     "관리자",
                     UserRole.ADMIN,
-                    UserStatus.ACTIVE
-            );
+                    UserStatus.ACTIVE);
             userRepository.save(admin);
             System.out.println("Admin created: admin@test.com / 1234");
         } else {
             System.out.println("Admin already exists");
         }
+
+        // USER 계정
+        if (!userRepository.existsByEmail("user@test.com")) {
+            User user = new User(
+                    "user@test.com",
+                    passwordEncoder.encode("1234"),
+                    "일반사용자",
+                    UserRole.USER,
+                    UserStatus.ACTIVE);
+            userRepository.save(user);
+            System.out.println("User created: user@test.com / 1234");
+        } else {
+            System.out.println("User already exists");
+        }
+
     }
 }
