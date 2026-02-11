@@ -28,11 +28,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilter(CorsFilter filter) {
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
         FilterRegistrationBean<CorsFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(filter);
+        registrationBean.setFilter(new CorsFilter());
         registrationBean.addUrlPatterns("/api/*");
-        registrationBean.setOrder(0); // ✅ JWT 필터보다 먼저
+        registrationBean.setOrder(0); // JWT보다 먼저
         return registrationBean;
     }
 
