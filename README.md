@@ -67,6 +67,7 @@ POST /api/users/login
   "email": "admin@test.com",
   "password": "1234"
 }
+```
 
 ---
 
@@ -79,3 +80,5 @@ POST /api/users/login
 - [x] React 연동
 - [x] CORS 해결
 - [x] SPA 라우팅 대응
+
+---
