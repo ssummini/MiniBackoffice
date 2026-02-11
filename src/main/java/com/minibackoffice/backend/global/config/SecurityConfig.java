@@ -18,13 +18,21 @@ public class SecurityConfig {
 
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilter(JwtAuthenticationFilter filter) {
-        FilterRegistrationBean<JwtAuthenticationFilter> registrationBean =
-                new FilterRegistrationBean<>();
+        FilterRegistrationBean<JwtAuthenticationFilter> registrationBean = new FilterRegistrationBean<>();
 
         registrationBean.setFilter(filter);
         registrationBean.addUrlPatterns("/api/*"); // 모든 API에 적용
         registrationBean.setOrder(1);
 
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilter(CorsFilter filter) {
+        FilterRegistrationBean<CorsFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(filter);
+        registrationBean.addUrlPatterns("/api/*");
+        registrationBean.setOrder(0); // ✅ JWT 필터보다 먼저
         return registrationBean;
     }
 
